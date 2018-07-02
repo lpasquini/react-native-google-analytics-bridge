@@ -1,5 +1,7 @@
 import { GoogleAnalyticsBridge } from './NativeBridges';
 
+const DEFAULT_DISPATCH_TIMEOUT = 15000;
+
 /**
  * Custom dimensions accept only strings and numbers.
  * @param customDimensionVal
@@ -53,7 +55,15 @@ export class GoogleAnalyticsTracker {
    * @param  {String} screenName The name of the current screen
    */
   trackScreenView(screenName) {
-    GoogleAnalyticsBridge.trackScreenView(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackScreenView(this.id, screenName);
+  }
+
+  /**
+   * Track the campaign from url
+   * @param  {String} urlString The url of the deep link
+   */
+  trackCampaignFromUrl(urlString) {
+    GoogleAnalyticsBridge.trackCampaignFromUrl(this.id, urlString);
   }
 
   /**
@@ -63,7 +73,7 @@ export class GoogleAnalyticsTracker {
    * @param  {Object} optionalValues An object containing optional label and value
    */
   trackEvent(category, action, optionalValues = {}) {
-    GoogleAnalyticsBridge.trackEvent(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackEvent(this.id, category, action, optionalValues);
   }
 
   /**
@@ -87,15 +97,26 @@ export class GoogleAnalyticsTracker {
     const formattedCustomDimensions = this.transformCustomDimensionsFieldsToIndexes(customDimensionValues);
     GoogleAnalyticsBridge.trackEventWithCustomDimensionValues(this.id, category, action, optionalValues, formattedCustomDimensions);
   }
-
   /**
+   * Track an event that has occured with custom dimension and metric values.
+   * @param  {String} category       The event category
+   * @param  {String} action         The event action
+   * @param  {Object} optionalValues An object containing optional label and value
+   * @param  {Object} customDimensionValues An object containing custom dimension key/value pairs
+   * @param  {Object} customMetricValues An object containing custom metric key/value pairs
+   */
+  trackEventWithCustomDimensionAndMetricValues(category, action, optionalValues = {}, customDimensionValues, customMetricValues) {
+    GoogleAnalyticsBridge.trackEventWithCustomDimensionAndMetricValues(this.id, category, action, optionalValues, customDimensionValues, customMetricValues);
+  }
+
+ /**
    * Track an event that has occured
    * @param  {String} category       The event category
    * @param  {Number} value         	The timing measurement in milliseconds
    * @param  {Object} optionalValues An object containing optional name and label
    */
   trackTiming(category, value, optionalValues = {}) {
-    GoogleAnalyticsBridge.trackTiming(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackTiming(this.id, category, value, optionalValues);
   }
 
   /**
@@ -106,7 +127,7 @@ export class GoogleAnalyticsTracker {
    * @param  {String} eventAction   The event action, defaults to Purchase
    */
   trackPurchaseEvent(product = {}, transaction = {}, eventCategory = "Ecommerce", eventAction = "Purchase") {
-    GoogleAnalyticsBridge.trackPurchaseEvent(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackPurchaseEvent(this.id, product, transaction, eventCategory, eventAction);
   }
 
   /**
@@ -117,7 +138,7 @@ export class GoogleAnalyticsTracker {
    * @param  {String} eventAction   The event action, defaults to Purchase
    */
   trackMultiProductsPurchaseEvent(products = [], transaction = {}, eventCategory = "Ecommerce", eventAction = "Purchase") {
-    GoogleAnalyticsBridge.trackMultiProductsPurchaseEvent(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackMultiProductsPurchaseEvent(this.id, products, transaction, eventCategory, eventAction);
   }
 
   /**
@@ -130,7 +151,7 @@ export class GoogleAnalyticsTracker {
    */
   trackMultiProductsPurchaseEventWithCustomDimensionValues(products = [], transaction = {}, eventCategory = "Ecommerce", eventAction = "Purchase", customDimensions) {
     const formattedCustomDimensions = this.transformCustomDimensionsFieldsToIndexes(customDimensions);
-    GoogleAnalyticsBridge.trackMultiProductsPurchaseEvent(this.id, products, transaction, eventCategory, eventAction, formattedCustomDimensions);
+    GoogleAnalyticsBridge.trackMultiProductsPurchaseEventWithCustomDimensionValues(this.id, products, transaction, eventCategory, eventAction, formattedCustomDimensions);
   }
 
   /**
@@ -139,7 +160,7 @@ export class GoogleAnalyticsTracker {
    * @param  {Boolean} fatal A value indiciating if the error was fatal, defaults to false
    */
   trackException(error, fatal = false) {
-    GoogleAnalyticsBridge.trackException(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackException(this.id, error, fatal);
   }
 
   /**
@@ -147,7 +168,23 @@ export class GoogleAnalyticsTracker {
    * @param {String} userId The current userId
    */
   setUser(userId) {
-    GoogleAnalyticsBridge.setUser(this.id, ...arguments);
+    GoogleAnalyticsBridge.setUser(this.id, userId);
+  }
+
+  /**
+   * Sets the current clientId for tracking.
+   * @param {String} clientId The current userId
+   */
+  setClient(clientId) {
+    GoogleAnalyticsBridge.setClient(this.id, clientId);
+  }
+
+  /**
+   * Get the current clientId.
+   * @returns {Promise<string>} Returns when done
+   */
+  getClientId() {
+    return GoogleAnalyticsBridge.getClientId(this.id);
   }
 
   /**
@@ -155,7 +192,7 @@ export class GoogleAnalyticsTracker {
    * @param  {Boolean} enabled Defaults to true
    */
   allowIDFA(enabled = true) {
-    GoogleAnalyticsBridge.allowIDFA(this.id, ...arguments);
+    GoogleAnalyticsBridge.allowIDFA(this.id, enabled);
   }
 
   /**
@@ -165,7 +202,7 @@ export class GoogleAnalyticsTracker {
    * @param  {String} targetUrl
    */
   trackSocialInteraction(network, action, targetUrl) {
-    GoogleAnalyticsBridge.trackSocialInteraction(this.id, ...arguments);
+    GoogleAnalyticsBridge.trackSocialInteraction(this.id, network, action, targetUrl);
   }
 
   /**
@@ -173,7 +210,7 @@ export class GoogleAnalyticsTracker {
    * @param {Boolean} enabled
    */
   setTrackUncaughtExceptions(enabled) {
-    GoogleAnalyticsBridge.setTrackUncaughtExceptions(this.id, ...arguments);
+    GoogleAnalyticsBridge.setTrackUncaughtExceptions(this.id, enabled);
   }
 
   /**
@@ -182,7 +219,7 @@ export class GoogleAnalyticsTracker {
    * @param {String} appName
    */
   setAppName(appName) {
-    GoogleAnalyticsBridge.setAppName(this.id, ...arguments);
+    GoogleAnalyticsBridge.setAppName(this.id, appName);
   }
 
   /**
@@ -190,7 +227,7 @@ export class GoogleAnalyticsTracker {
    * @param {String} appVersion
    */
   setAppVersion(appVersion) {
-    GoogleAnalyticsBridge.setAppVersion(this.id, ...arguments);
+    GoogleAnalyticsBridge.setAppVersion(this.id, appVersion);
   }
 
   /**
@@ -199,7 +236,7 @@ export class GoogleAnalyticsTracker {
    * @param {Boolean} enabled
    */
   setAnonymizeIp(enabled) {
-    GoogleAnalyticsBridge.setAnonymizeIp(this.id, ...arguments);
+    GoogleAnalyticsBridge.setAnonymizeIp(this.id, enabled);
   }
 
   /**
@@ -207,6 +244,61 @@ export class GoogleAnalyticsTracker {
    * @param {Float} sampleRatio Percentage 0 - 100
    */
   setSamplingRate(sampleRatio) {
-    GoogleAnalyticsBridge.setSamplingRate(this.id, ...arguments);
+    GoogleAnalyticsBridge.setSamplingRate(this.id, sampleRatio);
+  }
+
+  /**
+   * Sets the currency for tracking.
+   * @param {String} currencyCode The currency ISO 4217 code
+   */
+  setCurrency(currencyCode) {
+    GoogleAnalyticsBridge.setCurrency(this.id, currencyCode);
+  }
+  
+  createNewSession(screenName) {
+    GoogleAnalyticsBridge.createNewSession(this.id, screenName);
+  }
+
+  /**
+   * This function lets you manually dispatch all hits which are queued.
+   * Use this function sparingly, as it will normally happen automatically
+   * as a batch.
+   * @returns {Promise<boolean>} Returns when done
+   */
+  dispatch() {
+    return GoogleAnalyticsBridge.dispatch();
+  }
+
+  /**
+   * The same as dispatch(), but also gives you the ability to time out
+   * the Promise in case dispatch takes too long.
+   * @param {Number} timeout The timeout. Default value is 15 sec.
+   * @returns {Promise<boolean>} Returns when done or timed out
+   */
+  dispatchWithTimeout(timeout = -1) {
+    if (timeout < 0) {
+      return GoogleAnalyticsBridge.dispatch();
+    }
+
+    let timer = null;
+
+    const withTimeout = timeout => (
+      new Promise(resolve => {
+        timer = setTimeout(() => {
+          timer = null;
+          resolve();
+        }, Math.min(timeout, DEFAULT_DISPATCH_TIMEOUT));
+      })
+    );
+
+    return Promise.race([
+      GoogleAnalyticsBridge.dispatch(),
+      withTimeout(timeout)
+    ]).then(result => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      return result;
+    });
   }
 }
